@@ -258,7 +258,7 @@ class XPyCommandProcessor(CommandProcessor):
         intArg: Optional[int],
         event_arg: Any,
         vm: Any,
-        prompt="trepan-xpy",
+        prompt="myAmazingPrompt",
     ):
         "command event processor: reading a commands do something with them."
 
@@ -338,6 +338,7 @@ class XPyCommandProcessor(CommandProcessor):
         self.setup()
         print_location(self)
         if offset >= 0 and event not in ('call', 'return'):
+            print('<HighLightInstruction>')
             self.msg(
                 "%s"
                 % format_instruction_with_highlight(
@@ -355,6 +356,7 @@ class XPyCommandProcessor(CommandProcessor):
                     repr=self._repr.repr
                 )
             )
+            print('</HighLightInstruction>')
 
         self.set_prompt(prompt)
         self.process_commands()

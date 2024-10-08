@@ -49,7 +49,7 @@ Examples:
         return complete_token(SetLogLevel.logger_choices, prefix)
 
     def get_loglevel_level(self, arg):
-        if not arg: return "info"
+        if not arg: return "debug"
         arg = arg.lower()
         if arg in SetLogLevel.logger_choices:
             return arg

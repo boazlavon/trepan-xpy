@@ -42,6 +42,20 @@ See also:
     need_stack = True
     short_help = "Show Program Counter or Instruction Offset information"
 
+    def print_locals_in_all_frames(self, limit=None):
+        stack = inspect.stack()
+        # Set limit to the stack length if not provided or exceeds stack length
+        limit = min(limit or len(stack), len(stack))
+        print("<FlocalsStack>")
+        for i, frame_info in enumerate(stack[:limit]):
+            print("\t<FlocalsEntry>")
+            print(f"\t\t<Frame> {i} </Frame>")
+            print(f"\t\t<Function> {frame_info.function} </Function>")
+            print(f"\t\t<Flocals> {frame_info.frame.f_locals.keys()} </Flocals>")
+            print("\t<FlocalsEntry>")
+        print("<FlocalsStack>")
+        print()
+
     def run(self, args):
         """Program counter."""
         proc = self.proc
@@ -49,10 +63,17 @@ See also:
         if curframe:
             line_no = inspect.getlineno(curframe)
             offset = curframe.f_lasti
+
+            self.msg('<PcOffset>')
             self.msg("PC offset is %d." % offset)
+            self.msg('</PcOffset>')
+            self.msg('')
+
             offset = max(offset, 0)
             code = curframe.f_code
             co_code = code.co_code
+
+            self.msg('<DisassembleBytes>')
             disassemble_bytes(
                 self.msg,
                 self.msg_nocr,
@@ -67,9 +88,26 @@ See also:
                 cells=code.co_cellvars,
                 freevars=code.co_freevars,
                 linestarts=dict(findlinestarts(code)),
-                end_offset=offset + 10,
+                #end_offset=offset + 10,
+                end_offset=None,
                 opc=proc.vm.opc,
             )
+            self.msg('</DisassembleBytes>')
+            # args = [('msg', self.msg),
+            #     ('msg_nocr', self.msg_nocr),
+            #     ('code', co_code),
+            #     ('lasti', offset),
+            #     ('cur_line',line_no),
+            #     ('start_line', line_no - 1),
+            #     ('end_line', line_no + 1),
+            #     ('varnames', code.co_varnames),
+            #     ('names', code.co_names),
+            #     ('constants',code.co_consts),
+            #     ('cells',code.co_cellvars),
+            #     ('freevars',code.co_freevars),
+            #     ('linestarts',dict(findlinestarts(code))),
+            #     ('end_offset', None)]
+            #self.msg(args)
             pass
         return False
 
