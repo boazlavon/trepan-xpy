@@ -64,16 +64,16 @@ See also:
             line_no = inspect.getlineno(curframe)
             offset = curframe.f_lasti
 
-            self.msg('<PcOffset>')
+            self.msg('[[[PcOffset]]]')
             self.msg("PC offset is %d." % offset)
-            self.msg('</PcOffset>')
+            self.msg('[[[/PcOffset]]]')
             self.msg('')
 
             offset = max(offset, 0)
             code = curframe.f_code
             co_code = code.co_code
 
-            self.msg('<DisassembleBytes>')
+            self.msg('[[[DisassembleBytes]]]')
             disassemble_bytes(
                 self.msg,
                 self.msg_nocr,
@@ -92,7 +92,7 @@ See also:
                 end_offset=None,
                 opc=proc.vm.opc,
             )
-            self.msg('</DisassembleBytes>')
+            self.msg('[[[/DisassembleBytes]]]')
             # args = [('msg', self.msg),
             #     ('msg_nocr', self.msg_nocr),
             #     ('code', co_code),

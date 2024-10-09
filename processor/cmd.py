@@ -245,7 +245,8 @@ class XPyCommandProcessor(CommandProcessor):
         )
         highlight = self.debugger.settings["highlight"]
         if highlight and highlight in ("light", "dark"):
-            self.prompt_str = colorize("underline", self.prompt_str)
+            #self.prompt_str = colorize("underline", self.prompt_str)
+            self.prompt_str = self.prompt_str
         self.prompt_str += " "
 
     def event_hook(
@@ -338,7 +339,7 @@ class XPyCommandProcessor(CommandProcessor):
         self.setup()
         print_location(self)
         if offset >= 0 and event not in ('call', 'return'):
-            print('<HighLightInstruction>')
+            print('[[[HighLightInstruction]]]')
             self.msg(
                 "%s"
                 % format_instruction_with_highlight(
@@ -356,7 +357,7 @@ class XPyCommandProcessor(CommandProcessor):
                     repr=self._repr.repr
                 )
             )
-            print('</HighLightInstruction>')
+            print('[[[/HighLightInstruction]]]')
 
         self.set_prompt(prompt)
         self.process_commands()
