@@ -19,6 +19,8 @@ from xdis import findlinestarts
 
 from trepan.processor.command.base_subcmd import DebuggerSubcommand
 from trepan.lib.disassemble import disassemble_bytes
+import trepan.lib.stack as Mstack
+import linecache
 
 # FIXME: this could be combined with trepan3k's `info pc`, which doesn't
 # require a running program but uses use f_lasti.
@@ -48,16 +50,27 @@ See also:
         proc = self.proc
         frame = curframe
         while frame is not None and (limit is None or count < limit):
-            print('[[[DisassmbleFrameEntry]]]')
+            print('[[[FrameEntry]]]')
             print(f"[[[FrameIndex]]] {count} [[[/FrameIndex]]]")
-            print(f"[[[FrameId]]] {id(frame)} [[[/FrameId]]]")
+            #print(f"[[[FrameId]]] {id(frame)} [[[/FrameId]]]")
             print(f"[[[Function]]] {frame.f_code.co_name} [[[/Function]]]")
-
+            filename = Mstack.frame2file(self.proc.core, frame, canonic=False)
+            print(f"[[[Filename]]] {filename} [[[/Filename]]]")
+            print(f"[[[Locals]]]\n{frame.f_locals}\n[[[/Locals]]]")
             line_no = inspect.getlineno(frame)
-            offset = frame.f_lasti
+            line = linecache.getline(filename, line_no, frame.f_globals)
 
+            self.msg('[[[LineNumber]]]')
+            self.msg(line_no)
+            self.msg('[[[/LineNumber]]]')
+
+            self.msg('[[[SourceLine]]]')
+            self.msg(line)
+            self.msg('[[[/SourceLine]]]')
+
+            offset = frame.f_lasti
             self.msg('[[[PcOffset]]]')
-            self.msg("PC offset is %d." % offset)
+            self.msg(offset)
             self.msg('[[[/PcOffset]]]')
             self.msg('')
 
@@ -85,16 +98,16 @@ See also:
                 opc=proc.vm.opc,
             )
             self.msg('[[[/DisassembleBytes]]]')
-            print('[[[/DisassmbleFrameEntry]]]')
+            print('[[[/FrameEntry]]]')
 
             # Move to the previous frame
             frame = frame.f_back
             count += 1
 
     def run(self, args, limit=5):
-        print('[[[DisassmbleFrames]]]')
+        print('[[[InfoFrames]]]')
         self.print_locals_in_all_frames(self.proc.curframe, limit)
-        print('[[[/DisassmbleFrames]]]')
+        print('[[[/InfoFrames]]]')
 
     # def run(self, args):
     #     """Program counter."""

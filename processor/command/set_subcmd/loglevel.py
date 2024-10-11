@@ -83,7 +83,7 @@ Examples:
             logging.root.removeHandler(handler)
             pass
         logging.basicConfig(level=loglevel_level)
-        self.proc.commands["show"].run(["show", "loglevel"])
+        #self.proc.commands["show"].run(["show", "loglevel"])
         return
 
     pass

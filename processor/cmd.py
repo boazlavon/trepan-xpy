@@ -339,25 +339,26 @@ class XPyCommandProcessor(CommandProcessor):
         self.setup()
         print_location(self)
         if offset >= 0 and event not in ('call', 'return'):
-            print('[[[HighLightInstruction]]]')
-            self.msg(
-                "%s"
-                % format_instruction_with_highlight(
-                    vm.frame,
-                    vm.opc,
-                    byteName,
-                    intArg,
-                    event_arg,
-                    offset,
-                    line_number,
-                    extra_debug=False,
-                    settings=self.debugger.settings,
-                    show_line=False,  # We show the line number in our location reporting
-                    vm=self.vm,
-                    repr=self._repr.repr
-                )
-            )
-            print('[[[/HighLightInstruction]]]')
+            pass
+            # print('[[[HighLightInstruction]]]')
+            # self.msg(
+            #     "%s"
+            #     % format_instruction_with_highlight(
+            #         vm.frame,
+            #         vm.opc,
+            #         byteName,
+            #         intArg,
+            #         event_arg,
+            #         offset,
+            #         line_number,
+            #         extra_debug=False,
+            #         settings=self.debugger.settings,
+            #         show_line=False,  # We show the line number in our location reporting
+            #         vm=self.vm,
+            #         repr=self._repr.repr
+            #     )
+            # )
+            # print('[[[/HighLightInstruction]]]')
 
         self.set_prompt(prompt)
         self.process_commands()
