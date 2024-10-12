@@ -53,10 +53,9 @@ See also:
             print('[[[FrameEntry]]]')
             print(f"[[[FrameIndex]]] {count} [[[/FrameIndex]]]")
             #print(f"[[[FrameId]]] {id(frame)} [[[/FrameId]]]")
-            print(f"[[[Function]]] {frame.f_code.co_name} [[[/Function]]]")
             filename = Mstack.frame2file(self.proc.core, frame, canonic=False)
             print(f"[[[Filename]]] {filename} [[[/Filename]]]")
-            print(f"[[[Locals]]]\n{frame.f_locals}\n[[[/Locals]]]")
+            print(f"[[[Function]]] {frame.f_code.co_name} [[[/Function]]]")
             line_no = inspect.getlineno(frame)
             line = linecache.getline(filename, line_no, frame.f_globals)
 
@@ -98,6 +97,8 @@ See also:
                 opc=proc.vm.opc,
             )
             self.msg('[[[/DisassembleBytes]]]')
+
+            print(f"[[[Locals]]]\n{frame.f_locals}\n[[[/Locals]]]")
             print('[[[/FrameEntry]]]')
 
             # Move to the previous frame
