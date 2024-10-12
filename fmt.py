@@ -16,7 +16,7 @@ from trepan.lib.format import (
 
 LINE_NUMBER_WIDTH = 4
 LINE_NUMBER_WIDTH_FMT = "%%-%dd" % LINE_NUMBER_WIDTH
-LINE_NUMBER_SPACES = " " * (LINE_NUMBER_WIDTH + len("L. ")) + "@"
+LINE_NUMBER_SPACES = " " * (LINE_NUMBER_WIDTH + len("L. ")) + "PC."
 
 
 def format_instruction_with_highlight(
@@ -74,7 +74,7 @@ def format_instruction_with_highlight(
         number_str = format_token(
             LineNumber, LINE_NUMBER_WIDTH_FMT % line_number, highlight=highlight
         )
-        line_str = "L. %s@" % number_str
+        line_str = "L. %sPC." % number_str
         format_token(fmt_type, argrepr),
 
     mess = "%s%3d: %s%s %s" % (
@@ -84,11 +84,11 @@ def format_instruction_with_highlight(
         stack_args,
         format_token(fmt_type, argrepr),
     )
-    if extra_debug and frame:
-        filename = basename(code.co_filename) if settings["basename"] else code.co_filename
-        mess += " %s in %s:%s" % (
-            format_token(Function, code.co_name, highlight=highlight),
-            format_token(Filename, filename, highlight=highlight),
-            format_token(LineNumber, str(frame.f_lineno), highlight=highlight),
-        )
+    # if extra_debug and frame:
+        # filename = basename(code.co_filename) if settings["basename"] else code.co_filename
+        # mess += " %s in %s:%s" % (
+        #     format_token(Function, code.co_name, highlight=highlight),
+        #     format_token(Filename, filename, highlight=highlight),
+        #     format_token(LineNumber, str(frame.f_lineno), highlight=highlight),
+        # )
     return mess
