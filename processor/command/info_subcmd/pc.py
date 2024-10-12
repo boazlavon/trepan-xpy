@@ -16,6 +16,7 @@
 
 import inspect
 from xdis import findlinestarts
+import json
 
 from trepan.processor.command.base_subcmd import DebuggerSubcommand
 from trepan.lib.disassemble import disassemble_bytes
@@ -43,6 +44,22 @@ See also:
     max_args = 0
     need_stack = True
     short_help = "Show Program Counter or Instruction Offset information"
+
+    def generate_locals_dump(self, locals_dict):
+        def safe_serialize(value):
+            # Try to serialize the value; if it fails, use the repr of the value
+            try:
+                json.dumps(value)  # Test if JSON serializable
+                return value       # Return as-is if serializable
+            except (TypeError, ValueError):
+                return repr(value) # Use repr as fallback for non-serializable objects
+
+        # Create a new dictionary with serialized or repr values
+        safe_locals = {key: safe_serialize(value) for key, value in locals_dict.items()}
+        
+        # Convert the dictionary to a JSON string with pretty-printing
+        return json.dumps(safe_locals, indent=4)
+
 
     def print_locals_in_all_frames(self, curframe, limit=None):
         count = 0  # Initialize a counter to limit frames
@@ -98,7 +115,7 @@ See also:
             )
             self.msg('[[[/DisassembleBytes]]]')
 
-            print(f"[[[Locals]]]\n{frame.f_locals}\n[[[/Locals]]]")
+            print(f"[[[Locals]]]\n{self.generate_locals_dump(frame.f_locals)}\n[[[/Locals]]]")
             print('[[[/FrameEntry]]]')
 
             # Move to the previous frame
