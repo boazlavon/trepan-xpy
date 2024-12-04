@@ -94,7 +94,7 @@ See also:
             code = frame.f_code
             co_code = code.co_code
 
-            self.msg('[[[DisassembleBytes]]]')
+            self.msg('[[[PythonBytecodes]]]')
             disassemble_bytes(
                 self.msg,
                 self.msg_nocr,
@@ -113,7 +113,7 @@ See also:
                 end_offset=None,
                 opc=proc.vm.opc,
             )
-            self.msg('[[[/DisassembleBytes]]]')
+            self.msg('[[[/PythonBytecodes]]]')
 
             print(f"[[[Locals]]]\n{self.generate_locals_dump(frame.f_locals)}\n[[[/Locals]]]")
             print('[[[/FrameEntry]]]')
