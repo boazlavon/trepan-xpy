@@ -115,7 +115,10 @@ See also:
             )
             self.msg('[[[/PythonBytecodes]]]')
 
+            locals_values = self.generate_locals_dump(frame.f_locals)
+            locals_types = { key: type(value).__name__ for key, value in frame.f_locals.items() }
             print(f"[[[Locals]]]\n{self.generate_locals_dump(frame.f_locals)}\n[[[/Locals]]]")
+            print(f"[[[LocalsTypes]]]\n{self.generate_locals_dump(locals_types)}\n[[[/LocalsTypes]]]")
             print('[[[/FrameEntry]]]')
 
             # Move to the previous frame
