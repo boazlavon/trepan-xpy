@@ -114,6 +114,7 @@ class TrepanXPy(object):
             else:
                 if trace_only:
                     break
+                sys.exit(0)
                 msg = "The program finished - press enter to restart; anything else terminates. ? "
                 response = input(msg)
                 if response != "":

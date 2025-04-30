@@ -75,7 +75,8 @@ Examples:
                 loglevel_level = logging.WARNING
             else:
                 assert level_str == "debug"
-                loglevel_level = logging.DEBUG
+                # loglevel_level = logging.DEBUG
+                loglevel_level = logging.INFO
             pass
 
         # Remove all handlers associated with the root logger object.

@@ -17,12 +17,23 @@
 import inspect
 from xdis import findlinestarts
 import json
+import sys
 
 from trepan.processor.command.base_subcmd import DebuggerSubcommand
 from trepan.lib.disassemble import disassemble_bytes
 import trepan.lib.stack as Mstack
 import linecache
 
+FILTER_KEYS = [
+    "__name__",
+    "__doc__",
+    "__package__",
+    "__loader__",
+    "__spec__",
+    "__file__",
+    "__builtins__",
+    "__locals__",
+]
 # FIXME: this could be combined with trepan3k's `info pc`, which doesn't
 # require a running program but uses use f_lasti.
 # What we have here is less desirable the presence of exceptions,
@@ -58,77 +69,97 @@ See also:
         safe_locals = {key: safe_serialize(value) for key, value in locals_dict.items()}
         
         # Convert the dictionary to a JSON string with pretty-printing
-        return json.dumps(safe_locals, indent=4)
+        return json.dumps(safe_locals)
 
 
     def print_locals_in_all_frames(self, curframe, limit=None):
         count = 0  # Initialize a counter to limit frames
         
         proc = self.proc
+        event = proc.event
+        count = 0
+        limit = 5
+        # find last frame
         frame = curframe
-        while frame is not None and (limit is None or count < limit):
-            print('[[[FrameEntry]]]')
-            print(f"[[[FrameIndex]]] {count} [[[/FrameIndex]]]")
-            #print(f"[[[FrameId]]] {id(frame)} [[[/FrameId]]]")
-            filename = Mstack.frame2file(self.proc.core, frame, canonic=False)
-            print(f"[[[Filename]]] {filename} [[[/Filename]]]")
-            print(f"[[[Function]]] {frame.f_code.co_name} [[[/Function]]]")
-            line_no = inspect.getlineno(frame)
-            line = linecache.getline(filename, line_no, frame.f_globals)
-
-            self.msg('[[[LineNumber]]]')
-            self.msg(line_no)
-            self.msg('[[[/LineNumber]]]')
-
-            self.msg('[[[SourceLine]]]')
-            self.msg(line)
-            self.msg('[[[/SourceLine]]]')
-
-            offset = frame.f_lasti
-            self.msg('[[[PcOffset]]]')
-            self.msg(offset)
-            self.msg('[[[/PcOffset]]]')
-            self.msg('')
-
-            offset = max(offset, 0)
-            code = frame.f_code
-            co_code = code.co_code
-
-            self.msg('[[[PythonBytecodes]]]')
-            disassemble_bytes(
-                self.msg,
-                self.msg_nocr,
-                code = co_code,
-                lasti = offset,
-                cur_line = line_no,
-                start_line = line_no - 1,
-                end_line = line_no + 1,
-                varnames=code.co_varnames,
-                names=code.co_names,
-                constants=code.co_consts,
-                cells=code.co_cellvars,
-                freevars=code.co_freevars,
-                linestarts=dict(findlinestarts(code)),
-                #end_offset=offset + 10,
-                end_offset=None,
-                opc=proc.vm.opc,
-            )
-            self.msg('[[[/PythonBytecodes]]]')
-
-            locals_values = self.generate_locals_dump(frame.f_locals)
-            locals_types = { key: type(value).__name__ for key, value in frame.f_locals.items() }
-            print(f"[[[Locals]]]\n{self.generate_locals_dump(frame.f_locals)}\n[[[/Locals]]]")
-            print(f"[[[LocalsTypes]]]\n{self.generate_locals_dump(locals_types)}\n[[[/LocalsTypes]]]")
-            print('[[[/FrameEntry]]]')
-
-            # Move to the previous frame
-            frame = frame.f_back
+        iter_frame = curframe
+        while iter_frame is not None and (limit is None or count < limit):
+            iter_frame = iter_frame.f_back
             count += 1
 
+        # print('[[[FrameEntry]]]')
+        # print(f"[[[FrameIndex]]] {count} [[[/FrameIndex]]]")
+        #print(f"[[[FrameId]]] {id(frame)} [[[/FrameId]]]")
+        filename = Mstack.frame2file(self.proc.core, frame, canonic=False)
+        # print(f"[[[Filename]]] {filename} [[[/Filename]]]")
+        # print(f"[[[Function]]] {frame.f_code.co_name} [[[/Function]]]")
+        line_no = inspect.getlineno(frame)
+        line = linecache.getline(filename, line_no, frame.f_globals)
+
+        # self.msg('[[[LineNumber]]]')
+        # self.msg(line_no)
+        # self.msg('[[[/LineNumber]]]')
+
+        # self.msg('[[[SourceLine]]]')
+        # self.msg(line)
+        # self.msg('[[[/SourceLine]]]')
+
+        offset = frame.f_lasti
+        # self.msg('[[[PcOffset]]]')
+        # self.msg(offset)
+        # self.msg('[[[/PcOffset]]]')
+        # self.msg('')
+
+        offset = max(offset, 0)
+        code = frame.f_code
+        co_code = code.co_code
+
+        # self.msg('[[[PythonBytecodes]]]')
+        # disassemble_bytes(
+        #     self.msg,
+        #     self.msg_nocr,
+        #     code = co_code,
+        #     lasti = offset,
+        #     cur_line = line_no,
+        #     start_line = line_no - 1,
+        #     end_line = line_no + 1,
+        #     varnames=code.co_varnames,
+        #     names=code.co_names,
+        #     constants=code.co_consts,
+        #     cells=code.co_cellvars,
+        #     freevars=code.co_freevars,
+        #     linestarts=dict(findlinestarts(code)),
+        #     #end_offset=offset + 10,
+        #     end_offset=None,
+        #     opc=proc.vm.opc,
+        # )
+        # self.msg('[[[/PythonBytecodes]]]')
+
+        # locals_values = self.generate_locals_dump(frame.f_locals)
+        locals_dict = { key: value for key, value in frame.f_locals.items() if key not in FILTER_KEYS }
+        locals_types = { key: type(value).__name__ for key, value in locals_dict.items() }
+        # print(f"[[[Locals]]]\n{self.generate_locals_dump(frame.f_locals)}\n[[[/Locals]]]")
+        # print(f"[[[LocalsTypes]]]\n{self.generate_locals_dump(locals_types)}\n[[[/LocalsTypes]]]")
+        stack_str = ""
+        if count > 0:
+            stack_str = f"{count * '='} "
+        sys.stderr.write(f"{stack_str}{self.generate_locals_dump(locals_dict)} , {self.generate_locals_dump(locals_types)}\n")
+        source_line = line.replace("\n", "")
+        line_str = f"{event.upper()}: {source_line}"
+        sys.stderr.write(f"{line_str}\n")
+        if self.proc.event in ["return", "exception"]:
+            val = self.proc.event_arg
+            # print('[[[ReturnValue]]]')
+            # intf_obj.msg(f"{proc_obj._saferepr(val)}")
+            # sys.stderr.write(f"{proc_obj._saferepr(val)}\n")
+            sys.stderr.write(f"Return Value: {val}\n")
+        # print('[[[/FrameEntry]]]')
+
+        # Move to the previous frame
+
     def run(self, args, limit=5):
-        print('[[[InfoFrames]]]')
+        # print('[[[InfoFrames]]]')
         self.print_locals_in_all_frames(self.proc.curframe, limit)
-        print('[[[/InfoFrames]]]')
+        # print('[[[/InfoFrames]]]')
 
     # def run(self, args):
     #     """Program counter."""

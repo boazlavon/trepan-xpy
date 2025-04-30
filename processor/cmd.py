@@ -234,7 +234,7 @@ class XPyCommandProcessor(CommandProcessor):
             pass
         return cmd_instances
 
-    def set_prompt(self, prompt="trepan-xpy"):
+    def set_prompt(self, prompt="trepan-xpy", empty=False):
         if self.thread_name and self.thread_name != "MainThread":
             prompt += ":" + self.thread_name
             pass
@@ -243,6 +243,8 @@ class XPyCommandProcessor(CommandProcessor):
             prompt,
             ")" * self.debug_nest,
         )
+        if empty:
+            self.prompt_str = ''
         highlight = self.debugger.settings["highlight"]
         if highlight and highlight in ("light", "dark"):
             #self.prompt_str = colorize("underline", self.prompt_str)
@@ -259,7 +261,7 @@ class XPyCommandProcessor(CommandProcessor):
         intArg: Optional[int],
         event_arg: Any,
         vm: Any,
-        prompt="myAmazingPrompt",
+        prompt="myDsgiPrompt",
     ):
         "command event processor: reading a commands do something with them."
 
@@ -360,7 +362,7 @@ class XPyCommandProcessor(CommandProcessor):
             # )
             # print('[[[/HighLightInstruction]]]')
 
-        self.set_prompt(prompt)
+        self.set_prompt(prompt, empty=False)
         self.process_commands()
         if filename == "<string>":
             pyficache.remove_remap_file("<string>")
